@@ -1,0 +1,9 @@
+[project]
+name = "pysi-hw01-dual"
+version = "0.1.0"
+description = "Python w systemach SI, zadanie domowe 1: różniczkowanie automatyczne za pomocą klasy Dual"
+requires-python = ">=3.10"
+dependencies = []
+
+[dependency-groups]
+dev = ["pytest>=8"]

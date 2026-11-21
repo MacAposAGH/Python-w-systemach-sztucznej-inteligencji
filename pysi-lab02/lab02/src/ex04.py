@@ -38,6 +38,8 @@ class Dual:
 
     def __truediv__(self, other) -> "Dual":
         """(a, b) / (c, d) = (a / c, (b c - a d) / c**2): the quotient rule."""
+        other = lift(other)
+        Dual(self.value / other.value, (self.deriv * other.value - self.value * other.deriv) / (other.value ** 2))
         raise NotImplementedError  # TODO
 
     def __rtruediv__(self, other) -> "Dual":
@@ -46,7 +48,6 @@ class Dual:
     def __pow__(self, n: int) -> "Dual":
         """(a, b) ** n = (a**n, n a**(n - 1) b) for an integer n: the power rule."""
         raise NotImplementedError  # TODO
-
 
 
 def lift(x) -> Dual:
