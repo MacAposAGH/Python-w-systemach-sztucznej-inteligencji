@@ -77,7 +77,7 @@ squares_list = [i * i for i in range(1_000_000)]
 squares_gen = (i * i for i in range(1_000_000))
 print(sys.getsizeof(squares_list), sys.getsizeof(squares_gen))
 print(sum(squares_gen))
-print(sum(squares_gen))  # a generator is used up after one pass
+print(sum(squares_gen))  # after the last element every next() raises StopIteration: the sum of nothing is 0
 
 
 # %%
@@ -98,7 +98,7 @@ def running_mean(xs: Iterable[float]) -> Iterator[float]:
 # print(list(running_mean([2.0, 4.0, 6.0])))  # [2.0, 3.0, 4.0]
 
 # %%
-# type annotations: documentation checked by tools (mypy, pyright), not by the interpreter
+# type annotations: documentation checked by static type checkers (e.g. mypy), not by the interpreter
 from collections.abc import Callable
 
 Function = Callable[[float], float]

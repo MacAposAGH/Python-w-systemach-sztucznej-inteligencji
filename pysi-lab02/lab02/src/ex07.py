@@ -6,10 +6,8 @@ import math
 
 import pytest
 
-try:
-    from ex04 import Dual, derivative, exp, sin  # as a file: `pytest ex07.py` in src/lab02
-except ImportError:
-    pass  # in the notebook the names are already defined by ex04
+if "Dual" not in globals():  # as a file (`pytest ex07.py` in the src folder): import ex04;
+    from ex04 import Dual, derivative, exp, sin  # in the notebook ex04 has already defined the names
 
 
 def test_add_and_mul():
