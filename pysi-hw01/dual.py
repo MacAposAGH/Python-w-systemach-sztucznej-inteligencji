@@ -53,22 +53,25 @@ class Dual:
     def __truediv__(self, other) -> "Dual":
         """(a, b) / (c, d) = (a / c, (b c - a d) / c**2); ZeroDivisionError for c = 0"""
         other = lift(other)
-        return Dual(self.value / other.value, (self.deriv * other.value - self.value * other.deriv) / (other.value ** 2))
+        return Dual(self.value / other.value,
+                    (self.deriv * other.value - self.value * other.deriv) / (other.value ** 2))
 
     def __rtruediv__(self, other) -> "Dual":  # other / self
         return lift(other) / self
 
     # --- R3: powers ------------------------------------------------------------------
     def __pow__(self, p) -> "Dual":
+        # print(0 ** 0, 0 * (0.0 ** (-1)) * 1)
         """(a, b) ** p = (a**p, p a**(p-1) b) for a plain exponent p.
-
         An int exponent works for every base (p = 0 gives derivative 0); a non-integer
         exponent needs a > 0 (ValueError otherwise). A Dual exponent is not supported
         (TypeError).
         """
+        if p == 0:
+            return Dual(1.0, 0.0)
         if isinstance(p, Dual):
             raise TypeError(f"Expected int or float, got Dual")
-        if isinstance(p, float) and self.value < 0:
+        if isinstance(p, float) and self.value <= 0:
             raise ValueError(f"Base must be positive for non-integer exponent")
         return Dual(self.value ** p, p * (self.value ** (p - 1)) * self.deriv)
 
@@ -76,7 +79,7 @@ class Dual:
         """c ** (a, b) = (c**a, c**a ln(c) b) for a plain base c > 0"""
         if c <= 0:
             raise ValueError(f"Base must be positive")
-        return Dual(self.value ** c, c ** self.value * math.log(c) * self.deriv)
+        return Dual(c ** self.value, c ** self.value * math.log(c) * self.deriv)
 
 
 def lift(x) -> Dual:
@@ -96,31 +99,36 @@ def lift(x) -> Dual:
 # f(Dual(a, b)) = Dual(f(a), f'(a) * b): the chain rule; `x.deriv` is the derivative of the inner function
 
 def sin(x):
-    x = lift(x)
+    if isinstance(x, float):
+        return math.sin(x)
     return Dual(math.sin(x.value), math.cos(x.value) * x.deriv)
 
 
 def cos(x):
-    x = lift(x)
+    if isinstance(x, float):
+        return math.cos(x)
     return Dual(math.cos(x.value), -math.sin(x.value) * x.deriv)
 
 
 def tan(x):
     """tan' = 1 / cos**2"""
-    x = lift(x)
+    if isinstance(x, float):
+        return math.tan(x)
     return Dual(math.tan(x.value), 1 / (math.cos(x.value) ** 2) * x.deriv)
 
 
 def exp(x):
-    x = lift(x)
+    if isinstance(x, float):
+        return math.exp(x)
     return Dual(math.exp(x.value), math.exp(x.value) * x.deriv)
 
 
 def log(x):
     """log' = 1 / x; math.log raises ValueError for x <= 0, as for floats"""
     if isinstance(x, float) and x <= 0:
-        raise ValueError(f"Base must be positive")
-    x = lift(x)
+        raise ValueError
+    if isinstance(x, float):
+        return math.log(x)
     return Dual(math.log(x.value), (1 / x.value) * x.deriv)
 
 
@@ -128,6 +136,8 @@ def sqrt(x):
     """sqrt' = 1 / (2 sqrt x); x = 0 raises ZeroDivisionError (the derivative is infinite)"""
     if isinstance(x, float) and x == 0:
         raise ZeroDivisionError
+    if isinstance(x, float):
+        return math.sqrt(x)
     return Dual(x.value ** 2, (1 / (2 * math.sqrt(x.value))) * x.deriv)
 
 
@@ -138,20 +148,7 @@ def derivative(f: Callable) -> Callable[[float], float]:
 
     `lift` makes a function that returns a plain number (a constant) work too.
     """
-
-    def inner_derivative(x: float) -> float:
-        if not isinstance(x, Dual):
-            return f(x)
-        return f(Dual(x, 1.0)).deriv
-        # try:
-        #     d = Dual(x, 1.0)
-        #     f_res = f(d)
-        #     return lift(f_res).deriv
-        # except AttributeError:
-        #     raise AttributeError
-
-    return lambda x: f(Dual(x, 1.0)).deriv
-    # return inner_derivative
+    return lambda x: lift(f(Dual(x, 1.0))).deriv
 
 
 def gradient(f: Callable, point: Sequence[float]) -> list[float]:
@@ -159,4 +156,15 @@ def gradient(f: Callable, point: Sequence[float]) -> list[float]:
 
     In pass i the i-th argument is Dual(x_i, 1.0) and the others Dual(x_j, 0.0).
     """
-    raise NotImplementedError  # TODO
+
+    # This one was created by ChatGPT
+    grad = []
+    for i in range(len(point)):
+        def partial(t):
+            args = list(point)
+            args[i] = t
+            return f(*args)
+
+        grad.append(derivative(partial)(point[i]))
+
+    return grad

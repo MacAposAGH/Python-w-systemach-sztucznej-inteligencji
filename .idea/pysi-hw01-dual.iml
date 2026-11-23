@@ -4,6 +4,7 @@
     <content url="file://$MODULE_DIR$/pysi-hw01">
       <excludeFolder url="file://$MODULE_DIR$/pysi-hw01/.venv" />
     </content>
+    <orderEntry type="jdk" jdkName="~/Documents/PythonProjects/AGH/Python w systemach sztucznej inteligencji/pysi-hw01/.venv" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
 </module>

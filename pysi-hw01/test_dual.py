@@ -88,10 +88,10 @@ def test_r3_integer_power(n):
     assert close(derivative(lambda t: (t + 1) ** n)(x), 0.0 if n == 0 else n * (x + 1) ** (n - 1))
 
 
-# def test_r3_zero_base():
-#     assert Dual(0.0, 1.0) ** 0 == Dual(1.0, 0.0)
-#     assert Dual(0.0, 1.0) ** 2 == Dual(0.0, 0.0)
-#     assert derivative(lambda t: t**3)(0.0) == 0.0
+def test_r3_zero_base():
+    assert Dual(0.0, 1.0) ** 0 == Dual(1.0, 0.0)
+    assert Dual(0.0, 1.0) ** 2 == Dual(0.0, 0.0)
+    assert derivative(lambda t: t**3)(0.0) == 0.0
 
 
 def test_r3_integer_power_negative_base():
@@ -131,14 +131,14 @@ FUNCTIONS = [
 ]
 
 
-# @pytest.mark.parametrize("x", POINTS)
-# @pytest.mark.parametrize(
-#     "f, ref, dref", FUNCTIONS, ids=[f[0].__name__ for f in FUNCTIONS]
-# )
-# def test_r4_value_and_derivative(f, ref, dref, x):
-#     assert isinstance(f(x), float)  # a plain number in, a plain number out
-#     assert f(x) == pytest.approx(ref(x), rel=1e-12)
-#     assert close(derivative(f)(x), dref(x))
+@pytest.mark.parametrize("x", POINTS)
+@pytest.mark.parametrize(
+    "f, ref, dref", FUNCTIONS, ids=[f[0].__name__ for f in FUNCTIONS]
+)
+def test_r4_value_and_derivative(f, ref, dref, x):
+    assert isinstance(f(x), float)  # a plain number in, a plain number out
+    assert f(x) == pytest.approx(ref(x), rel=1e-12)
+    assert close(derivative(f)(x), dref(x))
 
 
 @pytest.mark.parametrize("x", POINTS)
@@ -198,32 +198,32 @@ def test_r6_composite_matches_central_difference(g, x):
 # --- R7: partial derivatives ----------------------------------------------------------------
 
 
-# def test_r7_gradient_two_variables():
-#     f = lambda x, y: x * x * y + sin(y)
-#     x0, y0 = POINTS[0], POINTS[1]
-#     gx, gy = gradient(f, [x0, y0])
-#     assert close(gx, 2 * x0 * y0)
-#     assert close(gy, x0 * x0 + math.cos(y0))
+def test_r7_gradient_two_variables():
+    f = lambda x, y: x * x * y + sin(y)
+    x0, y0 = POINTS[0], POINTS[1]
+    gx, gy = gradient(f, [x0, y0])
+    assert close(gx, 2 * x0 * y0)
+    assert close(gy, x0 * x0 + math.cos(y0))
 
 
-# def test_r7_gradient_three_variables_vs_central_difference():
-#     f = lambda x, y, z: exp(x * y) / (1 + z * z) + log(x + y + z)
-#     point = POINTS[:3]
-#     grads = gradient(f, point)
-#     assert len(grads) == 3
-#     for i in range(3):
-#
-#         def along(t, i=i):
-#             args = list(point)
-#             args[i] = t
-#             return f(*args)
-#
-#         assert close(grads[i], central(along, point[i]))
-#
-#
-# def test_r6_function_returning_a_plain_number():
-#     assert derivative(lambda t: 2.0)(1.0) == 0.0
-#
-#
-# def test_r7_gradient_of_a_constant():
-#     assert gradient(lambda x, y: 1.0, [1.0, 2.0]) == [0.0, 0.0]
+def test_r7_gradient_three_variables_vs_central_difference():
+    f = lambda x, y, z: exp(x * y) / (1 + z * z) + log(x + y + z)
+    point = POINTS[:3]
+    grads = gradient(f, point)
+    assert len(grads) == 3
+    for i in range(3):
+
+        def along(t, i=i):
+            args = list(point)
+            args[i] = t
+            return f(*args)
+
+        assert close(grads[i], central(along, point[i]))
+
+
+def test_r6_function_returning_a_plain_number():
+    assert derivative(lambda t: 2.0)(1.0) == 0.0
+
+
+def test_r7_gradient_of_a_constant():
+    assert gradient(lambda x, y: 1.0, [1.0, 2.0]) == [0.0, 0.0]
